@@ -5,7 +5,10 @@ import tensorflow as tf
 import csv
 import matplotlib.pyplot as plt
 plt.style.use("seaborn")
+'''
+Object-Oriented Backtesting System for Mean Reversion Strategy
 
+'''
 class Backtest:
     def __init__(self, symbol_file, yahoo=True):
         if yahoo:

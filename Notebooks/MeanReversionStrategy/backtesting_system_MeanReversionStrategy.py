@@ -72,8 +72,14 @@ class Backtest:
 
         return metric
 
-    def plot(self, start, cols=None, end=None, format='-'):
+    def plot(self, start, cols=None, end=None, format='-', with_signal=False):
         if cols==None:
             cols = ["Close"]
         self.df[cols].loc[start:end].plot(figsize=(12,8))
-        plt.show()
+        if with_signal:
+            buysignals = self.df[self.df["Trade_Signal"]==1.0].loc[start:end].index
+            sellsignals = self.df[self.df["Trade_Signal"]==-1.0].loc[start:end].index
+            for id in buysignals:
+                plt.plot(id, self.df.loc[id, "Close"], "g^")
+            for id in sellsignals:
+                plt.plot(id, self.df.loc[id, "Close"], "rv")

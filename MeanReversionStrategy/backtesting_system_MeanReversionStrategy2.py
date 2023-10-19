@@ -24,20 +24,24 @@ class Backtest:
             print("No data pulled")
         else:
             self.calc_indicators()
-            self.generate_signals()
-            self.profit = self.calc_metric()
+            #self.generate_signals()
+            #self.profit = self.calc_metric()
 
     def calc_indicators(self, SMA=30, devs=(2, 2)):
         self.df["SMA"] = self.df.Price.rolling(SMA).mean()
         self.df["Lower_bb"] = self.df.SMA - self.df.Price.rolling(SMA).std() * devs[0]
         self.df["Upper_bb"] = self.df.SMA + self.df.Price.rolling(SMA).std() * devs[1]
-        self.df["distance"] = self.df.Price - self.df.SMA
+        self.df["Lower_1sd"] = self.df.SMA - self.df.Price.rolling(SMA).std()
+        self.df["Upper_1sd"] = self.df.SMA + self.df.Price.rolling(SMA).std()
+        self.df["UpperDistance"] = self.df.Price - self.df.Upper_1sd
+        self.df["LowerDistance"] = self.df.Price - self.df.Lower_1sd
         self.df.dropna(inplace = True)
     
     def generate_signals(self):
-        self.df["position"] = np.where(self.df.Price < self.df.Lower_bb, 1, np.nan)
-        self.df["position"] = np.where(self.df.Price > self.df.Upper_bb, -1, self.df.position)
-        self.df["position"] = np.where(self.df.distance * self.df.distance.shift(1) < 0, 0, self.df.position)
+        self.df["position"] = np.where(self.df.Price < self.df.Lower, 1, np.nan)
+        self.df["position"] = np.where(self.df.Price > self.df.Upper_BB, -1, self.df.position)
+        self.df["position"] = np.where(self.df.UpperDistance* self.df.UpperDistance.shift(1) < 0, 0, self.df.position)
+        self.df["position"] = np.where(self.df.LowerDistance* self.df.LowerDistance.shift(1) < 0, 0, self.df.position)
         self.df["position"] = self.df.position.ffill().fillna(0)
         self.df.loc[self.df.index[-1], "position"] = 0
         self.df["Trade_Signal"] = self.df.position - self.df.position.shift(1)

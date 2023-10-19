@@ -24,8 +24,8 @@ class Backtest:
             print("No data pulled")
         else:
             self.calc_indicators()
-            #self.generate_signals()
-            #self.profit = self.calc_metric()
+            self.generate_signals()
+            self.profit = self.calc_metric()
 
     def calc_indicators(self, SMA=30, devs=(2, 2)):
         self.df["SMA"] = self.df.Price.rolling(SMA).mean()
